@@ -1,0 +1,19 @@
+{
+  "name": "monitoring-app",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^0.27.2",
+    "bignumber.js": "^9.1.0",
+    "express": "^4.18.1",
+    "mongoose": "^6.4.6",
+    "web3": "^1.7.4"
+  }
+}
