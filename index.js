@@ -49,7 +49,7 @@ class LogScanner{
     subscribe()
     {
         let LogsOptions = {
-            address: '0x33A3f9F68624d8A031BBb807be45DD2411C19507' //paste contract address here 300000000000000
+            address: '0x0C7afd91c6F3F926a00bFdf4B56716D5Db59Cd27' //paste contract address here 300000000000000
         }
         let web3 = new Web3(this.ws_link);
         return web3.eth.subscribe('logs', LogsOptions)
