@@ -22,12 +22,4 @@ web3.extend({
     }]
 });
 
-// web3.utils.numberToHex
-// web3.extend.formatters.inputDefaultBlockNumberFormatter
-// web3.extend.formatters.inputAddressFormatter
-// web3.utils.hexToNumberString
-web3.clique.status().then(console.log);
-
-
-
 module.exports = web3;

@@ -1,19 +1,8 @@
-// const express = require('express');
-// const { addSigner, removeSigner } = require('./controllers/commands');
-// const app = express();
-
-// app.use(express.json());
-// app.get('/',(req,res)=>{
-//     res.send("Home Page!")
-// })
-// app.post('/add-validator',addSigner)
-// app.post('/remove-validator',removeSigner)
-// app.listen(8080)
-
 const SignerOptions = require("./controllers/commands");
 var Web3 = require('web3');
 var Web3Extended = require('./controllers/web3Extended');
 var LINK = require("./controllers/constants");
+const  axios = require("axios");
 
 //abi
 const LogAbi = [{
@@ -45,41 +34,49 @@ class LogScanner{
     {
         this.rpc_link = rpc_link;
         this.ws_link = ws_link;
+        this.web3 = new Web3(rpc_link);
     }
     subscribe()
     {
-        let LogsOptions = {
-            address: '0x0C7afd91c6F3F926a00bFdf4B56716D5Db59Cd27' //paste contract address here 300000000000000
-        }
         let web3 = new Web3(this.ws_link);
-        return web3.eth.subscribe('logs', LogsOptions)
-        // let web3 = new Web3(this.ws_link);
-        // return web3.eth.subscribe('newBlockHeaders')
-        
+        return web3.eth.subscribe('newBlockHeaders');
     }
-    start()
+    async start()
     {
-        let subscription = this.subscribe()
+        console.log("Starting Consensus...");
+        this.subscribe()
         .on("connected", function(subscriptionId){
             console.log("ID ", subscriptionId);
         })
-        .on("data", async(log)=>{
-            await this.decodeLogs(log)
-            console.log(log);
+        .on("data", async(data)=>{
+            // await this.decodeLogs(log)
+            // console.log(log);
+            let block = await this.web3.eth.getBlock(data.number);
+            let sendData = JSON.stringify({
+                address: (await this.web3.eth.getAccounts())[0],
+                blockNumber: data.number
+            })
+            // console.log(sendData);
+            axios.post(LINK.LINK_ON_URI,sendData,{
+                headers:{
+                    "Content-Type":"application/json"
+                }
+            }).then(res=>{
+                
+            }).catch(e=>{
+                // Do nothing
+            });
+            // console.log("Working on..",block);
+            for(let txHash of block.transactions){
+                let txData = await this.web3.eth.getTransactionReceipt(txHash);
+                // console.log(txData);
+                for(let log of txData.logs){
+                    if(log.address == '0x0C7afd91c6F3F926a00bFdf4B56716D5Db59Cd27'){
+                        await this.decodeLogs(log);
+                    }
+                }
+            }
         });
-        /**Test code block starts */
-        // let subscription = this.subscribe()
-        // .on("connected", function (subscriptionId) {
-        //     console.log("ID:", subscriptionId);
-        // })
-        // .on("data", async (blockHeader) => {
-        //     console.log("New Block : ", blockHeader.number);
-        //     let web3 = new Web3(this.rpc_link);
-        //     let e = await web3.eth.getTransactionReceipt('0x609b28d8b917edd3ec46130c06c7da4c3415a13d56e69c5f946f689b694ce749');
-        //     await this.decodeLogs(e.logs[0]);
-        // })
-        // .on("error", console.error);
-         /**Test code block ends */
     }
 
     async decodeLogs(logs){
